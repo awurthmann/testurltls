@@ -20,9 +20,11 @@ namespace testurltls
 {
     class urlTest
     {
-        public static void CheckUri(Uri myUri,String myTls)
+        #region Function CheckUri
+        public static void CheckUri(Uri myUri, String myTls)
         {
-            Log.WriteLog(String.Format("[INFO] Checking Url: {0}",myUri));
+            bool bHttps=false;
+            string sProtocol="";
 
             try
             {
@@ -50,6 +52,7 @@ namespace testurltls
                             //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls13;
                             //break;
                         default:
+                            myTls = "Negotiate";
                             break;
                     }
 
@@ -80,10 +83,18 @@ namespace testurltls
                                 //var m_DestinationHost = GetPrivateField(tlsStream, "m_DestinationHost");
                                 var state = GetPrivateField(tlsStream, "m_Worker");
                                 var protocol = (SslProtocols)GetPrivateProperty(state, "SslProtocol");
-                                string sProtocol = protocol.ToString();
 
-                                Log.WriteLog(String.Format("[INFO] Url HTTPS: {0}", "TRUE"));
-                                Log.WriteLog(String.Format("[INFO] Url Tls Version: {0}", sProtocol));
+                                if (myUri.Scheme == Uri.UriSchemeHttp)
+                                {
+                                    Log.WriteLog(String.Format("[INFO] Url {0} was forwarded to HTTPS", myUri.ToString()));
+                                    Console.WriteLine(String.Format(" Url {0} was forwarded to ", myUri.ToString()));
+                                }
+                                sProtocol = protocol.ToString();
+                                bHttps = true;
+                            }
+                            else
+                            {
+
                             }
                         }
 
@@ -100,7 +111,21 @@ namespace testurltls
             { 
 
             }
+
+            if (myTls == "Negotiate")
+            {
+                Console.WriteLine(String.Format("   Negotiated: {0}", sProtocol));
+                Console.WriteLine(String.Format("   Tested {0}: {1}", sProtocol, bHttps));
+                Log.WriteLog(String.Format("[INFO] Negotiated: {0}", sProtocol));
+                Log.WriteLog(String.Format("[INFO] Tested {0}: {1}", sProtocol, bHttps));
+            }
+            else
+            {
+                Console.WriteLine(String.Format("   Tested {0}: {1}", myTls, bHttps));
+                Log.WriteLog(String.Format("[INFO] Tested {0}: {1}", myTls, bHttps));
+            }
         }
+        #endregion Function CheckUri
 
         #region Get Private Attributes
         private static object GetPrivateProperty(object obj, string property)
