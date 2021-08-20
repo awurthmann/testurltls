@@ -3,6 +3,7 @@
 
 namespace testurltls
 {
+    #region Program Class
     class Program
     {
         #region Main()
@@ -11,33 +12,42 @@ namespace testurltls
             string url = "Blank";
             string tls = "Negotiate";
             bool log = false;
+            bool about = false;
+            bool warning = true;
 
             #region Arguments/Overrides
             if (args.Length == 1)
                 url = args[0].ToString();
 
-            if (args.Length >= 2 && args.Length % 2 == 0)
+            else if (args.Length >= 2 && args.Length % 2 == 0)
             {
                 for (int i = 0; i < args.Length; i++)
                 {
                     switch (args[i].ToString().ToLower())
                     {
+                        case "/u":
                         case "-u":
                         case "-url":
                             url = args[i + 1];
                             break;
+                        case "/t":
                         case "-t":
                         case "-tls":
                             tls = args[i + 1];
                             break;
+                        case "/l":
                         case "-l":
                         case "-log":
-                            if (string.Equals(args[i + 1], (string)"true",StringComparison.OrdinalIgnoreCase) || 
-                                string.Equals(args[i + 1], (string)"on", StringComparison.OrdinalIgnoreCase)
-                                )
-                            {
+                            if (string.Equals(args[i + 1], (string)"true",StringComparison.OrdinalIgnoreCase) ||
+                                    string.Equals(args[i + 1], (string)"on", StringComparison.OrdinalIgnoreCase))
                                 log = true;
-                            }
+                            break;
+                        case "/w":
+                        case "-w":
+                        case "-warning":
+                            if (string.Equals(args[i + 1], (string)"false", StringComparison.OrdinalIgnoreCase) ||
+                                    string.Equals(args[i + 1], (string)"off", StringComparison.OrdinalIgnoreCase))
+                                warning = false;
                             break;
                         case "/?":
                         case "-?":
@@ -46,6 +56,13 @@ namespace testurltls
                         case "/help":
                         case "/h":
                             ShowSyntax();
+                            break;
+                        case "/a":
+                        case "-a":
+                        case "-about":
+                            if (string.Equals(args[i + 1], (string)"true", StringComparison.OrdinalIgnoreCase) || 
+                                    string.Equals(args[i + 1], (string)"on", StringComparison.OrdinalIgnoreCase))
+                                ShowAbout();
                             break;
                     }
                 }
@@ -70,20 +87,13 @@ namespace testurltls
                 {
                     string[] tlses = new string[] { "Ssl3", "Tls", "Tls11", "Tls12" };
                     for (int i = 0; i < tlses.Length; i++)
-                    {
-                        urlTest.CheckUri(myUri, tlses[i], log);
-                    }
+                        urlTest.CheckUri(myUri, tlses[i], log, warning);
                 }
                 else
-                {
-                    urlTest.CheckUri(myUri, tls, log);
-                }
-                
+                    urlTest.CheckUri(myUri, tls, log, warning);
             }
             else
-            {
                 ShowSyntax();
-            }
         }
         #endregion Main()
 
@@ -98,6 +108,7 @@ namespace testurltls
             Console.WriteLine("    -tls or -t       [OPTIONAL] Specify protocol or 'all', Default: Negotiate");
             Console.WriteLine("                      Supported protocols: Ssl3, Tls, Tls11, Tls12");
             Console.WriteLine("    -log or -l       [OPTIONAL] 'on'|'off' Turns log to file on or off, Default: 'off'");
+            Console.WriteLine("    -warning or -w   [OPTIONAL] 'on'|'off' Turns redirect warning on or off, Default: 'on'");
             Console.WriteLine("    -h or -help      Shows these usage and syntax instructions");
             Console.WriteLine("");
             Console.WriteLine("Examples:");
@@ -108,5 +119,28 @@ namespace testurltls
             Environment.Exit(0);
         }
         #endregion ShowSyntax()
+
+        #region ShowAboutx()
+        private static void ShowAbout()
+        {
+            Console.WriteLine("");
+            Console.WriteLine("About: testurltls.exe (Test Turtles)");
+            Console.WriteLine("     _____     ____	     _____     ____	");
+            Console.WriteLine("    / 8  8 \\  |  O |	    / 8  8 \\  |  O |");
+            Console.WriteLine("   |8  8  8 |/ ____|	   |8  8  8 |/ ____|");
+            Console.WriteLine("   |_8___8___/		   |_8___8___/");
+            Console.WriteLine("^^^|_|_| |_|_|^^^^^^^^^^^^^|_|_| |_|_|^^^^^^^");
+            Console.WriteLine("");
+            Console.WriteLine("Orginal Author: Aaron Wurthmann");
+            Console.WriteLine("URL: https://github.com/awurthmann/testurltls");
+            Console.WriteLine("");
+            Console.WriteLine("Tested on:");
+            Console.WriteLine("     Microsoft Windows [Version 10.0.19042.1165]");
+            Console.WriteLine("                            .NET Framework 4.6.1");
+            Console.WriteLine("");
+            Environment.Exit(0);
+        }
+        #endregion ShowAbout()
     }
+    #endregion Program Class
 }

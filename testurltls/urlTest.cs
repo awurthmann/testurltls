@@ -7,15 +7,16 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace testurltls
 {
+    #region urlTest Class
     class urlTest
     {
-        #region Function CheckUri
-        public static void CheckUri(Uri myUri, String myTls, bool log)
+        #region Function CheckUri()
+        public static void CheckUri(Uri myUri, String myTls, bool log, bool warning)
         {
             bool bHttps=false;
             string sProtocol="";
 
-
+            #region HttpClient
             try
             {
                 using (var httpClient = new HttpClient()) 
@@ -26,18 +27,25 @@ namespace testurltls
 
                     switch (myTls)
                     {
+                        case "ssl3":
                         case "Ssl3":
                             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3;
                             break;
+                        case "tls":
                         case "Tls":
+                        case "tls1":
+                        case "Tls1":
                             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls;
                             break;
+                        case "tls11":
                         case "Tls11":
                             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11;
                             break;
+                        case "tls12":
                         case "Tls12":
                             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                             break;
+                        //case "tls13":
                         //case "Tls13":
                             //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls13;
                             //break;
@@ -56,7 +64,8 @@ namespace testurltls
                         return result;
                     };
 
-                    try 
+                    #region GetAsync()
+                    try
                     {
                         var request = httpClient.GetAsync(myUri);
                         var response = request.Result;
@@ -79,17 +88,25 @@ namespace testurltls
                                 {
                                     if (log)
                                         Log.WriteLog(String.Format("[INFO] Url '{0}' was redirected to 'HTTPS://{1}'", myUri.ToString(), m_DestinationHost));
-                                    Console.ForegroundColor = ConsoleColor.Yellow;
-                                        Console.WriteLine(String.Format(" Url '{0}' was redirected to 'HTTPS://{1}'", myUri.ToString(), m_DestinationHost));
-                                    Console.ResetColor();
+                                    if (warning)
+                                    {
+                                        Console.ForegroundColor = ConsoleColor.Yellow;
+                                            Console.WriteLine(String.Format(" Url '{0}' was redirected to 'HTTPS://{1}'", myUri.ToString(), m_DestinationHost));
+                                        Console.ResetColor();
+                                    }
+
                                 }
                                 else if (myUri.Host != m_DestinationHost.ToString())
                                 {
                                     if (log)
                                         Log.WriteLog(String.Format("[INFO] Host '{0}' was redirected to '{1}'", myUri.Host, m_DestinationHost));
-                                    Console.ForegroundColor = ConsoleColor.Yellow;
-                                        Console.WriteLine(String.Format(" Host '{0}' was redirected to '{1}'", myUri.Host, m_DestinationHost));
-                                    Console.ResetColor();
+                                    if (warning)
+                                    {
+                                        Console.ForegroundColor = ConsoleColor.Yellow;
+                                            Console.WriteLine(String.Format(" Host '{0}' was redirected to '{1}'", myUri.Host, m_DestinationHost));
+                                        Console.ResetColor();
+                                    }
+
                                 }
                                 sProtocol = protocol.ToString();
                                 bHttps = true;
@@ -145,6 +162,7 @@ namespace testurltls
                             }
                         }
                     }//End Catch httpClient.GetAsync(myUri)
+                    #endregion GetAsync()
                 }
             }//End Try httpClient = new HttpClient()
             catch (Exception ex)
@@ -166,11 +184,14 @@ namespace testurltls
                         Log.WriteLog(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.Message));
                 }
             }//End Catch httpClient = new HttpClient()
+            #endregion HttpClient
 
+            #region Output
             if (myTls == "Negotiate")
             {
-                Console.WriteLine(String.Format("   Negotiated: {0}", sProtocol));
-                Console.WriteLine(String.Format("   {0} Connected: {1}", sProtocol, bHttps));
+                string sExpandedTls = ExpandTlsVersion(sProtocol);
+                Console.WriteLine(String.Format("   Negotiated: {0}", sExpandedTls));
+                Console.WriteLine(String.Format("   {0} Connected: {1}", sExpandedTls, bHttps));
                 if (log)
                 {
                     Log.WriteLog(String.Format("[INFO] Negotiated: {0}", sProtocol));
@@ -179,14 +200,15 @@ namespace testurltls
             }
             else
             {
-                Console.WriteLine(String.Format("   {0} Connected: {1}", myTls, bHttps));
+                Console.WriteLine(String.Format("   {0} Connected: {1}", ExpandTlsVersion(myTls), bHttps));
                 if (log)
-                    Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", myTls, bHttps));
+                    Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", ExpandTlsVersion(myTls), bHttps));
             }
+            #endregion Output
         }
-        #endregion Function CheckUri
+        #endregion Function CheckUri()
 
-        #region Get Private Attributes
+        #region Get Private Attributes Functions
         private static object GetPrivateProperty(object obj, string property)
         {
             return obj.GetType().GetProperty(property, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(obj);
@@ -201,6 +223,35 @@ namespace testurltls
         {
             return obj.GetType().BaseType.GetField(field, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(obj);
         }
-        #endregion Get Private Attributes
+        #endregion Get Private Attributes Functions
+
+        #region ExpandTlsVersion()
+        private static string ExpandTlsVersion(string tls)
+        {
+            switch (tls)
+            {
+                case "Ssl3":
+                case "ssl3":
+                    return "SSL 3.0";
+                case "tls1":
+                case "Tls1":
+                case "tls":
+                case "Tls":
+                    return "TLS 1.0";
+                case "Tls11":
+                case "tls11":
+                    return "TLS 1.1";
+                case "tls12":
+                case "Tls12":
+                    return "TLS 1.2";
+                case "tls13":
+                case "Tls13":
+                    return "TLS 1.3";
+                default:
+                    return "ERROR";
+            }
+        }
+        #endregion ExpandTlsVersion()
     }
+    #endregion urlTest Class
 }
