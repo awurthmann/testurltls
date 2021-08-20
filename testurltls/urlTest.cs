@@ -10,7 +10,7 @@ namespace testurltls
     class urlTest
     {
         #region Function CheckUri
-        public static void CheckUri(Uri myUri, String myTls, String log)
+        public static void CheckUri(Uri myUri, String myTls, bool log)
         {
             bool bHttps=false;
             string sProtocol="";
@@ -77,7 +77,7 @@ namespace testurltls
 
                                 if (myUri.Scheme == Uri.UriSchemeHttp)
                                 {
-                                    if (log == "on")
+                                    if (log)
                                         Log.WriteLog(String.Format("[INFO] Url '{0}' was redirected to 'HTTPS://{1}'", myUri.ToString(), m_DestinationHost));
                                     Console.ForegroundColor = ConsoleColor.Yellow;
                                         Console.WriteLine(String.Format(" Url '{0}' was redirected to 'HTTPS://{1}'", myUri.ToString(), m_DestinationHost));
@@ -85,7 +85,7 @@ namespace testurltls
                                 }
                                 else if (myUri.Host != m_DestinationHost.ToString())
                                 {
-                                    if (log == "on")
+                                    if (log)
                                         Log.WriteLog(String.Format("[INFO] Host '{0}' was redirected to '{1}'", myUri.Host, m_DestinationHost));
                                     Console.ForegroundColor = ConsoleColor.Yellow;
                                         Console.WriteLine(String.Format(" Host '{0}' was redirected to '{1}'", myUri.Host, m_DestinationHost));
@@ -96,7 +96,7 @@ namespace testurltls
                             }
                             else
                             {
-                                if (log == "on")
+                                if (log)
                                     Log.WriteLog(String.Format("[INFO] Unable to establish HTTPS session with {0}", myUri.ToString()));
                             }
                         }
@@ -108,7 +108,7 @@ namespace testurltls
                         if (ex.InnerException.ToString().Contains("The remote name could not be resolved"))
                         {
                             Console.WriteLine(String.Format("[ERROR] Unable to resolve host '{0}'", myUri.Host));
-                            if (log == "on")
+                            if (log)
                                 Log.WriteLog(String.Format("[ERROR] Unable to resolve host '{0}'", myUri.Host));
                             Environment.Exit(1);
                         }
@@ -118,14 +118,14 @@ namespace testurltls
                             ex.InnerException.ToString().Contains("Could not create SSL/TLS secure channel")
                             )
                         {
-                            if (log == "on")
+                            if (log)
                                 Log.WriteLog(String.Format("[INFO] Host '{0}' refused '{1}'", myUri.Host, myTls));
                         }
                         //Connection Refused
                         else if (ex.InnerException.ToString().Contains("No connection could be made because the target machine actively refused it"))
                         {
                             Console.WriteLine(String.Format("[ERROR] No connection could be made because {0} actively refused it", myUri.Host));
-                            if (log == "on")
+                            if (log)
                                 Log.WriteLog(String.Format("[ERROR] No connection could be made because {0} actively refused it", myUri.Host));
                         }
                         //Other Exception
@@ -134,13 +134,13 @@ namespace testurltls
                             if (ex.InnerException != null)
                             {
                                 Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.InnerException));
-                                if (log == "on")
+                                if (log)
                                     Log.WriteLog(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.InnerException));
                             }
                             else
                             {
                                 Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.Message));
-                                if (log == "on")
+                                if (log)
                                     Log.WriteLog(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.Message));
                             }
                         }
@@ -150,19 +150,19 @@ namespace testurltls
             catch (Exception ex)
             {
                 Console.WriteLine(String.Format("[ERROR] Creating httpClient, CheckUri({0},{1},{3})", myUri.ToString(), myTls, log));
-                if (log == "on")
+                if (log)
                     Log.WriteLog(String.Format("[ERROR] Creating httpClient, CheckUri({0},{1},{3})", myUri.ToString(), myTls, log));
 
                 if (ex.InnerException != null)
                 {
                     Console.WriteLine(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.InnerException));
-                    if (log == "on")
+                    if (log)
                         Log.WriteLog(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.InnerException));
                 }
                 else
                 {
                     Console.WriteLine(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.Message));
-                    if (log == "on")
+                    if (log)
                         Log.WriteLog(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.Message));
                 }
             }//End Catch httpClient = new HttpClient()
@@ -171,7 +171,7 @@ namespace testurltls
             {
                 Console.WriteLine(String.Format("   Negotiated: {0}", sProtocol));
                 Console.WriteLine(String.Format("   {0} Connected: {1}", sProtocol, bHttps));
-                if (log == "on")
+                if (log)
                 {
                     Log.WriteLog(String.Format("[INFO] Negotiated: {0}", sProtocol));
                     Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", sProtocol, bHttps));
@@ -180,7 +180,7 @@ namespace testurltls
             else
             {
                 Console.WriteLine(String.Format("   {0} Connected: {1}", myTls, bHttps));
-                if (log == "on")
+                if (log)
                     Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", myTls, bHttps));
             }
         }

@@ -10,7 +10,7 @@ namespace testurltls
         {
             string url = "Blank";
             string tls = "Negotiate";
-            string log = "off";
+            bool log = false;
 
             #region Arguments/Overrides
             if (args.Length == 1)
@@ -32,7 +32,12 @@ namespace testurltls
                             break;
                         case "-l":
                         case "-log":
-                            log = args[i + 1];
+                            if (string.Equals(args[i + 1], (string)"true",StringComparison.OrdinalIgnoreCase) || 
+                                string.Equals(args[i + 1], (string)"on", StringComparison.OrdinalIgnoreCase)
+                                )
+                            {
+                                log = true;
+                            }
                             break;
                         case "/?":
                         case "-?":
@@ -58,7 +63,7 @@ namespace testurltls
             if (isUri)
             {
                 Console.WriteLine(String.Format("Checking Url: {0}, TLS Version: {1}",url,tls));
-                if (log == "on")
+                if (log)
                     Log.WriteLog(String.Format("[INFO] Checking Url: {0}, TLS Version: {1}", url, tls));
 
                 if (tls == "all")
