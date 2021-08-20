@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace testurltls
 {
@@ -13,10 +10,11 @@ namespace testurltls
         {
             string url = "Blank";
             string tls = "Negotiate";
+            string log = "off";
 
             #region Arguments/Overrides
             if (args.Length == 1)
-                ShowSyntax();
+                url = args[0].ToString();
 
             if (args.Length >= 2 && args.Length % 2 == 0)
             {
@@ -31,6 +29,10 @@ namespace testurltls
                         case "-t":
                         case "-tls":
                             tls = args[i + 1];
+                            break;
+                        case "-l":
+                        case "-log":
+                            log = args[i + 1];
                             break;
                         case "/?":
                         case "-?":
@@ -55,20 +57,21 @@ namespace testurltls
 
             if (isUri)
             {
-                Log.WriteLog(String.Format("[INFO] Checking Url: {0}, TLS Version: {1}",url,tls));
                 Console.WriteLine(String.Format("Checking Url: {0}, TLS Version: {1}",url,tls));
+                if (log == "on")
+                    Log.WriteLog(String.Format("[INFO] Checking Url: {0}, TLS Version: {1}", url, tls));
 
                 if (tls == "all")
                 {
                     string[] tlses = new string[] { "Ssl3", "Tls", "Tls11", "Tls12" };
                     for (int i = 0; i < tlses.Length; i++)
                     {
-                        urlTest.CheckUri(myUri, tlses[i]);
+                        urlTest.CheckUri(myUri, tlses[i], log);
                     }
                 }
                 else
                 {
-                    urlTest.CheckUri(myUri, tls);
+                    urlTest.CheckUri(myUri, tls, log);
                 }
                 
             }
@@ -76,7 +79,6 @@ namespace testurltls
             {
                 ShowSyntax();
             }
-            //Ssl3, Tls, Tls11, Tls12, Tls13 <-- Not supported
         }
         #endregion Main()
 
@@ -84,20 +86,20 @@ namespace testurltls
         private static void ShowSyntax()
         {
             Console.WriteLine("");
-/*            Console.WriteLine("Usage: CreateHostsFile  [-dnsmode] [-pm, -premode] [-p, -pre]  [-o, -output] [-h -help]");
+            Console.WriteLine("Usage: testurltls.exe  [-url, -u] [-tls, -t] [-h -help]");
             Console.WriteLine("");
             Console.WriteLine("Options:");
-            Console.WriteLine("    -dnsmode         Sets DNS mode to 'full', use list of global DNS servers or 'quick', skip DNS checks. Default: 'quick'");
-            Console.WriteLine("    -pm or -premode  Sets previous file mode. 'all', 'settings', 'ips', Default: 'all' (both settings and IPs)");
-            Console.WriteLine("    -p or -previous  [Optional] Specify non-default previous file location and filename. Default: '.\\previous_hosts.json'");
-            Console.WriteLine("    -dnsfile         [Optional] Specify non-default DNS file location and filename. Default: '.\\nameserver.json'");
-            Console.WriteLine("    -o or -output    [Optional] Specify non-default output location and filename. Default: '.\\hosts.json'");
+            Console.WriteLine("    -url or -u       [REQUIRED] Url to connect to");
+            Console.WriteLine("    -tls or -t       [OPTIONAL] Specify protocol or 'all', Default: Negotiate");
+            Console.WriteLine("                      Supported protocols: Ssl3, Tls, Tls11, Tls12");
+            Console.WriteLine("    -log or -l       [OPTIONAL] 'on'|'off' Turns log to file on or off, Default: 'off'");
             Console.WriteLine("    -h or -help      Shows these usage and syntax instructions");
             Console.WriteLine("");
             Console.WriteLine("Examples:");
-            Console.WriteLine("                     CreateHostsFile.exe -m quick -o " + '"' + "test_hosts.json" + '"');
-            Console.WriteLine("                     CreateHostsFile.exe -mode quick -previous" + '"' + "c:\\tmep\\previous_hosts.json" + '"');
-            Console.WriteLine("");*/
+            Console.WriteLine("                     testurltls.exe -url https://www.google.com");
+            Console.WriteLine("                     testurltls.exe -url https://www.google.com -tls all");
+            Console.WriteLine("                     testurltls.exe -url https://www.google.com -tls Ssl3");
+            Console.WriteLine("");
             Environment.Exit(0);
         }
         #endregion ShowSyntax()

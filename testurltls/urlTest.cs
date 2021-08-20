@@ -1,30 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace testurltls
 {
     class urlTest
     {
         #region Function CheckUri
-        public static void CheckUri(Uri myUri, String myTls)
+        public static void CheckUri(Uri myUri, String myTls, String log)
         {
             bool bHttps=false;
             string sProtocol="";
+
 
             try
             {
@@ -80,49 +70,118 @@ namespace testurltls
 
                             if (tlsStream.ToString() == "System.Net.TlsStream")
                             {
-                                //var m_DestinationHost = GetPrivateField(tlsStream, "m_DestinationHost");
+                                var m_DestinationHost = GetPrivateField(tlsStream, "m_DestinationHost");
                                 var state = GetPrivateField(tlsStream, "m_Worker");
                                 var protocol = (SslProtocols)GetPrivateProperty(state, "SslProtocol");
 
+
                                 if (myUri.Scheme == Uri.UriSchemeHttp)
                                 {
-                                    Log.WriteLog(String.Format("[INFO] Url {0} was forwarded to HTTPS", myUri.ToString()));
-                                    Console.WriteLine(String.Format(" Url {0} was forwarded to ", myUri.ToString()));
+                                    if (log == "on")
+                                        Log.WriteLog(String.Format("[INFO] Url '{0}' was redirected to 'HTTPS://{1}'", myUri.ToString(), m_DestinationHost));
+                                    Console.ForegroundColor = ConsoleColor.Yellow;
+                                        Console.WriteLine(String.Format(" Url '{0}' was redirected to 'HTTPS://{1}'", myUri.ToString(), m_DestinationHost));
+                                    Console.ResetColor();
+                                }
+                                else if (myUri.Host != m_DestinationHost.ToString())
+                                {
+                                    if (log == "on")
+                                        Log.WriteLog(String.Format("[INFO] Host '{0}' was redirected to '{1}'", myUri.Host, m_DestinationHost));
+                                    Console.ForegroundColor = ConsoleColor.Yellow;
+                                        Console.WriteLine(String.Format(" Host '{0}' was redirected to '{1}'", myUri.Host, m_DestinationHost));
+                                    Console.ResetColor();
                                 }
                                 sProtocol = protocol.ToString();
                                 bHttps = true;
                             }
                             else
                             {
-
+                                if (log == "on")
+                                    Log.WriteLog(String.Format("[INFO] Unable to establish HTTPS session with {0}", myUri.ToString()));
                             }
                         }
 
-                    }
-                    catch
+                    }//End Try httpClient.GetAsync(myUri)
+                    catch (Exception ex)
                     {
-
-                    }
-
-
+                        //DNS Exception
+                        if (ex.InnerException.ToString().Contains("The remote name could not be resolved"))
+                        {
+                            Console.WriteLine(String.Format("[ERROR] Unable to resolve host '{0}'", myUri.Host));
+                            if (log == "on")
+                                Log.WriteLog(String.Format("[ERROR] Unable to resolve host '{0}'", myUri.Host));
+                            Environment.Exit(1);
+                        }
+                        //Algorithm Refused
+                        else if (
+                            ex.InnerException.ToString().Contains("The client and server cannot communicate, because they do not possess a common algorithm") || 
+                            ex.InnerException.ToString().Contains("Could not create SSL/TLS secure channel")
+                            )
+                        {
+                            if (log == "on")
+                                Log.WriteLog(String.Format("[INFO] Host '{0}' refused '{1}'", myUri.Host, myTls));
+                        }
+                        //Connection Refused
+                        else if (ex.InnerException.ToString().Contains("No connection could be made because the target machine actively refused it"))
+                        {
+                            Console.WriteLine(String.Format("[ERROR] No connection could be made because {0} actively refused it", myUri.Host));
+                            if (log == "on")
+                                Log.WriteLog(String.Format("[ERROR] No connection could be made because {0} actively refused it", myUri.Host));
+                        }
+                        //Other Exception
+                        else
+                        {
+                            if (ex.InnerException != null)
+                            {
+                                Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.InnerException));
+                                if (log == "on")
+                                    Log.WriteLog(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.InnerException));
+                            }
+                            else
+                            {
+                                Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.Message));
+                                if (log == "on")
+                                    Log.WriteLog(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.Message));
+                            }
+                        }
+                    }//End Catch httpClient.GetAsync(myUri)
                 }
-            }
-            catch 
-            { 
+            }//End Try httpClient = new HttpClient()
+            catch (Exception ex)
+            {
+                Console.WriteLine(String.Format("[ERROR] Creating httpClient, CheckUri({0},{1},{3})", myUri.ToString(), myTls, log));
+                if (log == "on")
+                    Log.WriteLog(String.Format("[ERROR] Creating httpClient, CheckUri({0},{1},{3})", myUri.ToString(), myTls, log));
 
-            }
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.InnerException));
+                    if (log == "on")
+                        Log.WriteLog(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.InnerException));
+                }
+                else
+                {
+                    Console.WriteLine(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.Message));
+                    if (log == "on")
+                        Log.WriteLog(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.Message));
+                }
+            }//End Catch httpClient = new HttpClient()
 
             if (myTls == "Negotiate")
             {
                 Console.WriteLine(String.Format("   Negotiated: {0}", sProtocol));
-                Console.WriteLine(String.Format("   Tested {0}: {1}", sProtocol, bHttps));
-                Log.WriteLog(String.Format("[INFO] Negotiated: {0}", sProtocol));
-                Log.WriteLog(String.Format("[INFO] Tested {0}: {1}", sProtocol, bHttps));
+                Console.WriteLine(String.Format("   {0} Connected: {1}", sProtocol, bHttps));
+                if (log == "on")
+                {
+                    Log.WriteLog(String.Format("[INFO] Negotiated: {0}", sProtocol));
+                    Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", sProtocol, bHttps));
+                }
             }
             else
             {
-                Console.WriteLine(String.Format("   Tested {0}: {1}", myTls, bHttps));
-                Log.WriteLog(String.Format("[INFO] Tested {0}: {1}", myTls, bHttps));
+                Console.WriteLine(String.Format("   {0} Connected: {1}", myTls, bHttps));
+                if (log == "on")
+                    Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", myTls, bHttps));
             }
         }
         #endregion Function CheckUri

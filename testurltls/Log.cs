@@ -1,11 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-
 
 namespace testurltls
 {
@@ -19,7 +14,7 @@ namespace testurltls
             try
             {
                 locker.AcquireWriterLock(int.MaxValue);
-                System.IO.File.AppendAllLines(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Replace("file:\\", ""), "log.txt"), new[] { myLogLineToWrite });
+                File.AppendAllLines(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Replace("file:\\", ""), "log.txt"), new[] { myLogLineToWrite });
             }
             finally
             {
