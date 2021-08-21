@@ -143,7 +143,7 @@ namespace testurltls
                         if (ex.InnerException.ToString().Contains("The remote name could not be resolved"))
                         {
                             if (!quiet)
-                                Console.WriteLine(String.Format("[ERROR] Unable to resolve host '{0}'", myUri.Host));
+                                Console.WriteLine(String.Format("ERROR: Unable to resolve host '{0}'", myUri.Host));
                             if (log)
                                 Log.WriteLog(String.Format("[ERROR] Unable to resolve host '{0}'", myUri.Host));
                             Environment.Exit(1);
@@ -189,7 +189,7 @@ namespace testurltls
                     }//End Catch httpClient.GetAsync(myUri)
                     #endregion GetAsync()
 
-                    //httpClient.Dispose();
+                    httpClient.Dispose();
                 }
                 
             }//End Try httpClient = new HttpClient()
