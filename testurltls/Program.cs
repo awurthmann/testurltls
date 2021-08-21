@@ -96,6 +96,7 @@ namespace testurltls
 
                 if (tls == "all" && quiet == false)
                 {
+                    //string[] tlses = new string[] { "Ssl3", "Tls", "Tls11", "Tls12", "Tls13" };
                     string[] tlses = new string[] { "Ssl3", "Tls", "Tls11", "Tls12" };
                     for (int i = 0; i < tlses.Length; i++)
                         urlTest.CheckUri(myUri, tlses[i], log, warning, quiet);
@@ -118,6 +119,7 @@ namespace testurltls
             Console.WriteLine("    -url or -u       [REQUIRED] Url to connect to");
             Console.WriteLine("    -tls or -t       [OPTIONAL] Specify protocol or 'all', Default: Negotiate");
             Console.WriteLine("                         Supported protocols: Ssl3, Tls, Tls11, Tls12");
+            Console.WriteLine("                         UNSUPPORTED protocols: Tls13, Ssl2, Ssl");
             Console.WriteLine("    -log or -l       [OPTIONAL] 'on'|'off' Turns log to file on or off, Default: 'off'");
             Console.WriteLine("    -warning or -w   [OPTIONAL] 'on'|'off' Turns redirect warning on or off, Default: 'on'");
             Console.WriteLine("    -quiet or -q     [OPTIONAL] 'on'|'off' Enables quiet mode, Default: 'off'");

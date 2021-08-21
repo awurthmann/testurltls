@@ -45,10 +45,10 @@ namespace testurltls
                         case "Tls12":
                             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                             break;
-                        //case "tls13":
-                        //case "Tls13":
-                            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls13;
-                            //break;
+                        case "tls13": //Unsupported
+                        case "Tls13": //Unsupported
+                            ServicePointManager.SecurityProtocol = (SecurityProtocolType)12288; 
+                            break;
                         default:
                             myTls = "Negotiate";
                             break;
@@ -70,7 +70,7 @@ namespace testurltls
                         var request = httpClient.GetAsync(myUri);
                         var response = request.Result;
 
-                        if (response.Content is StreamContent)
+                        if (response.StatusCode != HttpStatusCode.Forbidden && response.Content is StreamContent)
                         {
                             var webExceptionWrapperStream = GetPrivateField(response.Content, "content");
                             var connectStream = GetBasePrivateField(webExceptionWrapperStream, "innerStream");
@@ -82,16 +82,16 @@ namespace testurltls
                                 var m_DestinationHost = GetPrivateField(tlsStream, "m_DestinationHost");
                                 var state = GetPrivateField(tlsStream, "m_Worker");
                                 var protocol = (SslProtocols)GetPrivateProperty(state, "SslProtocol");
+                                string absoluteUri = response.RequestMessage.RequestUri.AbsoluteUri;
 
-
-                                if (myUri.Scheme == Uri.UriSchemeHttp)
+                                if (myUri.ToString() != absoluteUri)
                                 {
                                     if (log)
-                                        Log.WriteLog(String.Format("[INFO] Url '{0}' was redirected to 'HTTPS://{1}'", myUri.ToString(), m_DestinationHost));
+                                        Log.WriteLog(String.Format("[INFO] Url '{0}' was redirected to '{1}'", myUri.ToString(), absoluteUri));
                                     if (warning && !quiet)
                                     {
                                         Console.ForegroundColor = ConsoleColor.Yellow;
-                                            Console.WriteLine(String.Format(" Url '{0}' was redirected to 'HTTPS://{1}'", myUri.ToString(), m_DestinationHost));
+                                            Console.WriteLine(String.Format(" Url '{0}' was redirected to '{1}'", myUri.ToString(), absoluteUri));
                                         Console.ResetColor();
                                     }
 
@@ -117,6 +117,24 @@ namespace testurltls
                                     Log.WriteLog(String.Format("[INFO] Unable to establish HTTPS session with {0}", myUri.ToString()));
                             }
                         }
+                        else
+                        {
+                            if (response.StatusCode != null)
+                            {
+                                if (!quiet)
+                                    Console.WriteLine(String.Format("Returned status code {0},{1}", (int)response.StatusCode, response.StatusCode));
+                                if (log)
+                                    Log.WriteLog(String.Format("[INFO] Returned status code {1},{2}", myUri.ToString(), (int)response.StatusCode, response.StatusCode));
+
+                                if ((response.StatusCode == HttpStatusCode.Forbidden) && (myTls == "Negotiate" || string.Equals(myTls, (string)"tls12", StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    if (!quiet)
+                                        Console.WriteLine(String.Format("May require TLS 1.3, currently unsupported by application", myUri.ToString()));
+                                    if (log)
+                                        Log.WriteLog(String.Format("[INFO] {0} may require TLS 1.3, currently unsupported by application", myUri.ToString()));
+                                }
+                            }
+                        }
 
                     }//End Try httpClient.GetAsync(myUri)
                     catch (Exception ex)
@@ -124,7 +142,8 @@ namespace testurltls
                         //DNS Exception
                         if (ex.InnerException.ToString().Contains("The remote name could not be resolved"))
                         {
-                            Console.WriteLine(String.Format("[ERROR] Unable to resolve host '{0}'", myUri.Host));
+                            if (!quiet)
+                                Console.WriteLine(String.Format("[ERROR] Unable to resolve host '{0}'", myUri.Host));
                             if (log)
                                 Log.WriteLog(String.Format("[ERROR] Unable to resolve host '{0}'", myUri.Host));
                             Environment.Exit(1);
@@ -139,9 +158,13 @@ namespace testurltls
                                 Log.WriteLog(String.Format("[INFO] Host '{0}' refused '{1}'", myUri.Host, myTls));
                         }
                         //Connection Refused
-                        else if (ex.InnerException.ToString().Contains("No connection could be made because the target machine actively refused it"))
+                        else if (
+                            ex.InnerException.ToString().Contains("No connection could be made because the target machine actively refused it") ||
+                            ex.InnerException.ToString().Contains("The underlying connection was closed")
+                            )
                         {
-                            Console.WriteLine(String.Format("[ERROR] No connection could be made because {0} actively refused it", myUri.Host));
+                            if (!quiet)
+                                Console.WriteLine(String.Format("[ERROR] No connection could be made because {0} actively refused it", myUri.Host));
                             if (log)
                                 Log.WriteLog(String.Format("[ERROR] No connection could be made because {0} actively refused it", myUri.Host));
                         }
@@ -150,13 +173,15 @@ namespace testurltls
                         {
                             if (ex.InnerException != null)
                             {
-                                Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.InnerException));
+                                if (!quiet)
+                                    Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.InnerException));
                                 if (log)
                                     Log.WriteLog(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.InnerException));
                             }
                             else
                             {
-                                Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.Message));
+                                if (!quiet)
+                                    Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.Message));
                                 if (log)
                                     Log.WriteLog(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.Message));
                             }
@@ -164,7 +189,7 @@ namespace testurltls
                     }//End Catch httpClient.GetAsync(myUri)
                     #endregion GetAsync()
 
-                    httpClient.Dispose();
+                    //httpClient.Dispose();
                 }
                 
             }//End Try httpClient = new HttpClient()
@@ -191,33 +216,62 @@ namespace testurltls
             #endregion HttpClient
 
             #region Output
-            if (myTls == "Negotiate")
+            //Connected
+            if (sProtocol != null && sProtocol != "")
             {
-                if (quiet)
-                    Console.WriteLine(bHttps);
+                string sExpandedTls = ExpandTlsVersion(sProtocol);
+
+                if (myTls == "Negotiate")
+                {
+                    if (quiet)
+                        Console.WriteLine(bHttps);
+                    else
+                    {
+                        Console.WriteLine(String.Format("Negotiated: {0}", sExpandedTls));
+                        Console.WriteLine(String.Format("{0} Connected: {1}", sExpandedTls, bHttps));
+                    }
+
+                    if (log)
+                    {
+                        Log.WriteLog(String.Format("[INFO] Negotiated: {0}", sProtocol));
+                        Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", sProtocol, bHttps));
+                    }
+                }
                 else
                 {
-                    string sExpandedTls = ExpandTlsVersion(sProtocol);
-                    Console.WriteLine(String.Format("   Negotiated: {0}", sExpandedTls));
-                    Console.WriteLine(String.Format("   {0} Connected: {1}", sExpandedTls, bHttps));
-                }
+                    if (quiet)
+                        Console.WriteLine(bHttps);
+                    else
+                        Console.WriteLine(String.Format("{0} Connected: {1}", ExpandTlsVersion(myTls), bHttps));
 
-                if (log)
-                {
-                    Log.WriteLog(String.Format("[INFO] Negotiated: {0}", sProtocol));
-                    Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", sProtocol, bHttps));
+                    if (log)
+                        Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", ExpandTlsVersion(myTls), bHttps));
                 }
             }
+            //Unable to Connect
             else
             {
+                string sExpandedTls = ExpandTlsVersion(myTls);
+
                 if (quiet)
+                {
                     Console.WriteLine(bHttps);
+                }
+                else if (myTls == "Negotiate")
+                {
+                    Console.WriteLine(String.Format("Negotiated: {0}", bHttps));
+                    if (log)
+                        Log.WriteLog(String.Format("[INFO] Negotiated: {0}", bHttps));
+                }
                 else
-                    Console.WriteLine(String.Format("   {0} Connected: {1}", ExpandTlsVersion(myTls), bHttps));
-                
-                if (log)
-                    Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", ExpandTlsVersion(myTls), bHttps));
+                {
+                    Console.WriteLine(String.Format("{0} Connected: {1}", sExpandedTls, bHttps));
+
+                    if (log)
+                        Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", sExpandedTls, bHttps));
+                }
             }
+
             #endregion Output
         }
         #endregion Function CheckUri()
