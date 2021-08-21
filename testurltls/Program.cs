@@ -1,5 +1,8 @@
 ﻿using System;
 
+//  Microsoft Visual Studio Community 2019, Version: 16.9.3
+//  Microsoft Windows Version 10.0.19042.1165
+//  .NET Framework 4.6.1
 
 namespace testurltls
 {
@@ -12,8 +15,8 @@ namespace testurltls
             string url = "Blank";
             string tls = "Negotiate";
             bool log = false;
-            bool about = false;
             bool warning = true;
+            bool quiet = false;
 
             #region Arguments/Overrides
             if (args.Length == 1)
@@ -41,6 +44,13 @@ namespace testurltls
                             if (string.Equals(args[i + 1], (string)"true",StringComparison.OrdinalIgnoreCase) ||
                                     string.Equals(args[i + 1], (string)"on", StringComparison.OrdinalIgnoreCase))
                                 log = true;
+                            break;                        
+                        case "/q":
+                        case "-q":
+                        case "-quiet":
+                            if (string.Equals(args[i + 1], (string)"true",StringComparison.OrdinalIgnoreCase) ||
+                                    string.Equals(args[i + 1], (string)"on", StringComparison.OrdinalIgnoreCase))
+                                quiet = true;
                             break;
                         case "/w":
                         case "-w":
@@ -79,18 +89,19 @@ namespace testurltls
 
             if (isUri)
             {
-                Console.WriteLine(String.Format("Checking Url: {0}, TLS Version: {1}",url,tls));
+                if (!quiet)
+                    Console.WriteLine(String.Format("Checking Url: {0}, TLS Version: {1}",url,tls));
                 if (log)
                     Log.WriteLog(String.Format("[INFO] Checking Url: {0}, TLS Version: {1}", url, tls));
 
-                if (tls == "all")
+                if (tls == "all" && quiet == false)
                 {
                     string[] tlses = new string[] { "Ssl3", "Tls", "Tls11", "Tls12" };
                     for (int i = 0; i < tlses.Length; i++)
-                        urlTest.CheckUri(myUri, tlses[i], log, warning);
+                        urlTest.CheckUri(myUri, tlses[i], log, warning, quiet);
                 }
                 else
-                    urlTest.CheckUri(myUri, tls, log, warning);
+                    urlTest.CheckUri(myUri, tls, log, warning, quiet);
             }
             else
                 ShowSyntax();
@@ -106,9 +117,12 @@ namespace testurltls
             Console.WriteLine("Options:");
             Console.WriteLine("    -url or -u       [REQUIRED] Url to connect to");
             Console.WriteLine("    -tls or -t       [OPTIONAL] Specify protocol or 'all', Default: Negotiate");
-            Console.WriteLine("                      Supported protocols: Ssl3, Tls, Tls11, Tls12");
+            Console.WriteLine("                         Supported protocols: Ssl3, Tls, Tls11, Tls12");
             Console.WriteLine("    -log or -l       [OPTIONAL] 'on'|'off' Turns log to file on or off, Default: 'off'");
             Console.WriteLine("    -warning or -w   [OPTIONAL] 'on'|'off' Turns redirect warning on or off, Default: 'on'");
+            Console.WriteLine("    -quiet or -q     [OPTIONAL] 'on'|'off' Enables quiet mode, Default: 'off'");
+            Console.WriteLine("                         Quiet mode returns only the result 'True'|'False'");
+            Console.WriteLine("                          '-tls all' is ignored in quiet mode, -warning is set to 'off'");
             Console.WriteLine("    -h or -help      Shows these usage and syntax instructions");
             Console.WriteLine("");
             Console.WriteLine("Examples:");

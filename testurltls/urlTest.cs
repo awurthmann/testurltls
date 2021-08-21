@@ -11,7 +11,7 @@ namespace testurltls
     class urlTest
     {
         #region Function CheckUri()
-        public static void CheckUri(Uri myUri, String myTls, bool log, bool warning)
+        public static void CheckUri(Uri myUri, string myTls, bool log, bool warning, bool quiet)
         {
             bool bHttps=false;
             string sProtocol="";
@@ -88,7 +88,7 @@ namespace testurltls
                                 {
                                     if (log)
                                         Log.WriteLog(String.Format("[INFO] Url '{0}' was redirected to 'HTTPS://{1}'", myUri.ToString(), m_DestinationHost));
-                                    if (warning)
+                                    if (warning && !quiet)
                                     {
                                         Console.ForegroundColor = ConsoleColor.Yellow;
                                             Console.WriteLine(String.Format(" Url '{0}' was redirected to 'HTTPS://{1}'", myUri.ToString(), m_DestinationHost));
@@ -100,7 +100,7 @@ namespace testurltls
                                 {
                                     if (log)
                                         Log.WriteLog(String.Format("[INFO] Host '{0}' was redirected to '{1}'", myUri.Host, m_DestinationHost));
-                                    if (warning)
+                                    if (warning && !quiet)
                                     {
                                         Console.ForegroundColor = ConsoleColor.Yellow;
                                             Console.WriteLine(String.Format(" Host '{0}' was redirected to '{1}'", myUri.Host, m_DestinationHost));
@@ -163,7 +163,10 @@ namespace testurltls
                         }
                     }//End Catch httpClient.GetAsync(myUri)
                     #endregion GetAsync()
+
+                    httpClient.Dispose();
                 }
+                
             }//End Try httpClient = new HttpClient()
             catch (Exception ex)
             {
@@ -183,15 +186,22 @@ namespace testurltls
                     if (log)
                         Log.WriteLog(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.Message));
                 }
+
             }//End Catch httpClient = new HttpClient()
             #endregion HttpClient
 
             #region Output
             if (myTls == "Negotiate")
             {
-                string sExpandedTls = ExpandTlsVersion(sProtocol);
-                Console.WriteLine(String.Format("   Negotiated: {0}", sExpandedTls));
-                Console.WriteLine(String.Format("   {0} Connected: {1}", sExpandedTls, bHttps));
+                if (quiet)
+                    Console.WriteLine(bHttps);
+                else
+                {
+                    string sExpandedTls = ExpandTlsVersion(sProtocol);
+                    Console.WriteLine(String.Format("   Negotiated: {0}", sExpandedTls));
+                    Console.WriteLine(String.Format("   {0} Connected: {1}", sExpandedTls, bHttps));
+                }
+
                 if (log)
                 {
                     Log.WriteLog(String.Format("[INFO] Negotiated: {0}", sProtocol));
@@ -200,7 +210,11 @@ namespace testurltls
             }
             else
             {
-                Console.WriteLine(String.Format("   {0} Connected: {1}", ExpandTlsVersion(myTls), bHttps));
+                if (quiet)
+                    Console.WriteLine(bHttps);
+                else
+                    Console.WriteLine(String.Format("   {0} Connected: {1}", ExpandTlsVersion(myTls), bHttps));
+                
                 if (log)
                     Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", ExpandTlsVersion(myTls), bHttps));
             }
