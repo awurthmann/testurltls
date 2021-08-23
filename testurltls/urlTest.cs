@@ -45,10 +45,10 @@ namespace testurltls
                         case "Tls12":
                             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                             break;
-                        case "tls13": //Unsupported
-                        case "Tls13": //Unsupported
-                            ServicePointManager.SecurityProtocol = (SecurityProtocolType)12288; 
-                            break;
+                        //case "tls13": //Unsupported in .NET Framework
+                        //case "Tls13":
+                        //    ServicePointManager.SecurityProtocol = (SecurityProtocolType)12288; 
+                        //    break;
                         default:
                             myTls = "Negotiate";
                             break;
@@ -256,6 +256,7 @@ namespace testurltls
                 if (quiet)
                 {
                     Console.WriteLine(bHttps);
+                    //Environment.Exit(NumericTlsVersion(myTls));
                 }
                 else if (myTls == "Negotiate")
                 {
@@ -266,12 +267,12 @@ namespace testurltls
                 else
                 {
                     Console.WriteLine(String.Format("{0} Connected: {1}", sExpandedTls, bHttps));
+                    //Environment.Exit(ConvertTlsVersion(myTls));
 
                     if (log)
                         Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", sExpandedTls, bHttps));
                 }
             }
-
             #endregion Output
         }
         #endregion Function CheckUri()
@@ -296,30 +297,47 @@ namespace testurltls
         #region ExpandTlsVersion()
         private static string ExpandTlsVersion(string tls)
         {
-            switch (tls)
+            switch (tls.ToLower())
             {
-                case "Ssl3":
                 case "ssl3":
                     return "SSL 3.0";
-                case "tls1":
-                case "Tls1":
                 case "tls":
-                case "Tls":
+                case "tls1":
                     return "TLS 1.0";
-                case "Tls11":
                 case "tls11":
                     return "TLS 1.1";
                 case "tls12":
-                case "Tls12":
                     return "TLS 1.2";
-                case "tls13":
-                case "Tls13":
-                    return "TLS 1.3";
+                //case "tls13":
+                //    return "TLS 1.3";
                 default:
                     return "ERROR";
             }
         }
         #endregion ExpandTlsVersion()
+
+        #region NumericTlsVersion()
+        //private static int NumericTlsVersion(string tls)
+        //{
+        //    switch (tls.ToLower())
+        //    {
+        //        case "ssl3":
+        //            return 3;
+        //        case "tls":
+        //        case "tls1":
+        //            return 10;
+        //        case "tls11":
+        //            return 11;
+        //        case "tls12":
+        //            return 12;
+        //        //case "tls13":
+        //        //    return 13;
+        //        default:
+        //            return 1;
+        //    }
+        //}
+        #endregion NumericTlsVersion()
+
     }
     #endregion urlTest Class
 }

@@ -140,7 +140,7 @@ namespace testurltls
         private static void ShowAbout()
         {
             Console.WriteLine("");
-            Console.WriteLine("About: testurltls.exe (Test Turtles)");
+            Console.WriteLine("About: testurltls.exe (TestTurtles)");
             Console.WriteLine("     _____     ____	     _____     ____	");
             Console.WriteLine("    / 8  8 \\  |  O |	    / 8  8 \\  |  O |");
             Console.WriteLine("   |8  8  8 |/ ____|	   |8  8  8 |/ ____|");
