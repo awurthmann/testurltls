@@ -220,11 +220,14 @@ namespace testurltls
             if (sProtocol != null && sProtocol != "")
             {
                 string sExpandedTls = ExpandTlsVersion(sProtocol);
+                int iTlsVersion = NumericTlsVersion(sProtocol);
 
                 if (myTls == "Negotiate")
                 {
                     if (quiet)
+                    {
                         Console.WriteLine(bHttps);
+                    }
                     else
                     {
                         Console.WriteLine(String.Format("Negotiated: {0}", sExpandedTls));
@@ -236,6 +239,8 @@ namespace testurltls
                         Log.WriteLog(String.Format("[INFO] Negotiated: {0}", sProtocol));
                         Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", sProtocol, bHttps));
                     }
+
+                    Environment.Exit(iTlsVersion);
                 }
                 else
                 {
@@ -246,17 +251,19 @@ namespace testurltls
 
                     if (log)
                         Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", ExpandTlsVersion(myTls), bHttps));
+
+                    Environment.Exit(iTlsVersion);
                 }
             }
             //Unable to Connect
             else
             {
                 string sExpandedTls = ExpandTlsVersion(myTls);
+                int iTlsVersion = NumericTlsVersion(myTls);
 
                 if (quiet)
                 {
                     Console.WriteLine(bHttps);
-                    //Environment.Exit(NumericTlsVersion(myTls));
                 }
                 else if (myTls == "Negotiate")
                 {
@@ -267,11 +274,10 @@ namespace testurltls
                 else
                 {
                     Console.WriteLine(String.Format("{0} Connected: {1}", sExpandedTls, bHttps));
-                    //Environment.Exit(ConvertTlsVersion(myTls));
-
                     if (log)
                         Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", sExpandedTls, bHttps));
                 }
+                Environment.Exit(iTlsVersion);
             }
             #endregion Output
         }
@@ -317,25 +323,25 @@ namespace testurltls
         #endregion ExpandTlsVersion()
 
         #region NumericTlsVersion()
-        //private static int NumericTlsVersion(string tls)
-        //{
-        //    switch (tls.ToLower())
-        //    {
-        //        case "ssl3":
-        //            return 3;
-        //        case "tls":
-        //        case "tls1":
-        //            return 10;
-        //        case "tls11":
-        //            return 11;
-        //        case "tls12":
-        //            return 12;
-        //        //case "tls13":
-        //        //    return 13;
-        //        default:
-        //            return 1;
-        //    }
-        //}
+        private static int NumericTlsVersion(string tls)
+        {
+            switch (tls.ToLower())
+            {
+                case "ssl3":
+                    return 3;
+                case "tls":
+                case "tls1":
+                    return 10;
+                case "tls11":
+                    return 11;
+                case "tls12":
+                    return 12;
+                //case "tls13":
+                //    return 13;
+                default:
+                    return 1;
+            }
+        }
         #endregion NumericTlsVersion()
 
     }

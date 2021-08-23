@@ -127,10 +127,14 @@ namespace testurltls
             Console.WriteLine("                          '-tls all' is ignored in quiet mode, -warning is set to 'off'");
             Console.WriteLine("    -h or -help      Shows these usage and syntax instructions");
             Console.WriteLine("");
+            Console.WriteLine("Exit Codes:           App exits with the connected or attempted TLS version");
+            Console.WriteLine("                       1 = Error/Unable to negotiate, 3 = SSL 3, ");
+            Console.WriteLine("                       10 = TLS 1.0, 11 = TLS 1.1, 12 = TLS 1.2");
+            Console.WriteLine("");
             Console.WriteLine("Examples:");
-            Console.WriteLine("                     testurltls.exe -url https://www.google.com");
+            Console.WriteLine("                     testurltls.exe -url https://www.google.com -q on");
             Console.WriteLine("                     testurltls.exe -url https://www.google.com -tls all");
-            Console.WriteLine("                     testurltls.exe -url https://www.google.com -tls Ssl3");
+            Console.WriteLine("                     testurltls.exe -url https://www.google.com -tls Ssl3 -log on");
             Console.WriteLine("");
             Environment.Exit(0);
         }
