@@ -26,8 +26,8 @@ Options:
     -h or -help      Shows these usage and syntax instructions
 
 Exit Codes:           App exits with the connected or attempted TLS version
-                       1 = Error/Unable to negotiate, 3 = SSL 3,
-                       10 = TLS 1.0, 11 = TLS 1.1, 12 = TLS 1.2
+                       0 = All tested no errors, 1 = Error/Unable to negotiate,
+                       3 = SSL 3, 10 = TLS 1.0, 11 = TLS 1.1, 12 = TLS 1.2
 
 Examples:
                      testurltls.exe -url https://www.google.com -q on

@@ -11,7 +11,7 @@ namespace testurltls
     class urlTest
     {
         #region Function CheckUri()
-        public static void CheckUri(Uri myUri, string myTls, bool log, bool warning, bool quiet)
+        public static void CheckUri(Uri myUri, string myTls, bool log, bool warning, bool quiet, bool all)
         {
             bool bHttps=false;
             string sProtocol="";
@@ -165,6 +165,7 @@ namespace testurltls
                                 Console.WriteLine(String.Format("[ERROR] Outbound connection forbidden by access permissions"));
                             if (log)
                                 Log.WriteLog(String.Format("[ERROR] Outbound connection forbidden by access permissions"));
+                            Environment.Exit(1);
                         }                        
                         //Connection Refused
                         else if (
@@ -204,12 +205,6 @@ namespace testurltls
             }//End Try httpClient = new HttpClient()
             catch (Exception ex)
             {
-                //if (ex is FormatException || System.Net.WebException)
-                //{
-                //    Console.WriteLine("Hit here");
-                //}
-                Console.WriteLine("Hit here");
-
                 Console.WriteLine(String.Format("[ERROR] Creating httpClient, CheckUri({0},{1},{3})", myUri.ToString(), myTls, log));
                 if (log)
                     Log.WriteLog(String.Format("[ERROR] Creating httpClient, CheckUri({0},{1},{3})", myUri.ToString(), myTls, log));
@@ -267,7 +262,8 @@ namespace testurltls
                     if (log)
                         Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", ExpandTlsVersion(myTls), bHttps));
 
-                    Environment.Exit(iTlsVersion);
+                    if (!all)
+                        Environment.Exit(iTlsVersion);
                 }
             }
             //Unable to Connect
@@ -292,7 +288,10 @@ namespace testurltls
                     if (log)
                         Log.WriteLog(String.Format("[INFO] {0} Connected: {1}", sExpandedTls, bHttps));
                 }
-                Environment.Exit(iTlsVersion);
+
+                if (!all)
+                    Environment.Exit(iTlsVersion);
+
             }
             #endregion Output
         }

@@ -17,6 +17,7 @@ namespace testurltls
             bool log = false;
             bool warning = true;
             bool quiet = false;
+            bool all = false;
 
             #region Arguments/Overrides
             if (args.Length == 1)
@@ -96,13 +97,14 @@ namespace testurltls
 
                 if (tls == "all" && quiet == false)
                 {
+                    all = true;
                     //string[] tlses = new string[] { "Ssl3", "Tls", "Tls11", "Tls12", "Tls13" };
                     string[] tlses = new string[] { "Ssl3", "Tls", "Tls11", "Tls12" };
                     for (int i = 0; i < tlses.Length; i++)
-                        urlTest.CheckUri(myUri, tlses[i], log, warning, quiet);
+                        urlTest.CheckUri(myUri, tlses[i], log, warning, quiet, all);
                 }
                 else
-                    urlTest.CheckUri(myUri, tls, log, warning, quiet);
+                    urlTest.CheckUri(myUri, tls, log, warning, quiet, all);
             }
             else
                 ShowSyntax();
@@ -128,8 +130,8 @@ namespace testurltls
             Console.WriteLine("    -h or -help      Shows these usage and syntax instructions");
             Console.WriteLine("");
             Console.WriteLine("Exit Codes:           App exits with the connected or attempted TLS version");
-            Console.WriteLine("                       1 = Error/Unable to negotiate, 3 = SSL 3, ");
-            Console.WriteLine("                       10 = TLS 1.0, 11 = TLS 1.1, 12 = TLS 1.2");
+            Console.WriteLine("                       0 = All tested no errors, 1 = Error/Unable to negotiate,");
+            Console.WriteLine("                       3 = SSL 3, 10 = TLS 1.0, 11 = TLS 1.1, 12 = TLS 1.2");
             Console.WriteLine("");
             Console.WriteLine("Examples:");
             Console.WriteLine("                     testurltls.exe -url https://www.google.com -q on");
