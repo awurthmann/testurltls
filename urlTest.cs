@@ -157,6 +157,15 @@ namespace testurltls
                             if (log)
                                 Log.WriteLog(String.Format("[INFO] Host '{0}' refused '{1}'", myUri.Host, myTls));
                         }
+                        //Outbound Refused
+                        else if (
+                            ex.InnerException.ToString().Contains("An attempt was made to access a socket in a way forbidden by its access permissions"))
+                        {
+                            if (!quiet)
+                                Console.WriteLine(String.Format("[ERROR] Outbound connection forbidden by access permissions"));
+                            if (log)
+                                Log.WriteLog(String.Format("[ERROR] Outbound connection forbidden by access permissions"));
+                        }                        
                         //Connection Refused
                         else if (
                             ex.InnerException.ToString().Contains("No connection could be made because the target machine actively refused it") ||
@@ -174,16 +183,16 @@ namespace testurltls
                             if (ex.InnerException != null)
                             {
                                 if (!quiet)
-                                    Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.InnerException));
+                                    Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit. InnerException: {1}", myUri.ToString(), ex.InnerException));
                                 if (log)
-                                    Log.WriteLog(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.InnerException));
+                                    Log.WriteLog(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit. InnerException: {1}", myUri.ToString(), ex.InnerException));
                             }
                             else
                             {
                                 if (!quiet)
-                                    Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.Message));
+                                    Console.WriteLine(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit. Exception Message: {1}", myUri.ToString(), ex.Message));
                                 if (log)
-                                    Log.WriteLog(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit: {1}", myUri.ToString(), ex.Message));
+                                    Log.WriteLog(String.Format("[ERROR] httpClient.GetAsync({0}), Exception was hit. Exception Message: {1}", myUri.ToString(), ex.Message));
                             }
                         }
                     }//End Catch httpClient.GetAsync(myUri)
@@ -195,21 +204,27 @@ namespace testurltls
             }//End Try httpClient = new HttpClient()
             catch (Exception ex)
             {
+                //if (ex is FormatException || System.Net.WebException)
+                //{
+                //    Console.WriteLine("Hit here");
+                //}
+                Console.WriteLine("Hit here");
+
                 Console.WriteLine(String.Format("[ERROR] Creating httpClient, CheckUri({0},{1},{3})", myUri.ToString(), myTls, log));
                 if (log)
                     Log.WriteLog(String.Format("[ERROR] Creating httpClient, CheckUri({0},{1},{3})", myUri.ToString(), myTls, log));
 
                 if (ex.InnerException != null)
                 {
-                    Console.WriteLine(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.InnerException));
+                    Console.WriteLine(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit. InnerException: {0}", ex.InnerException));
                     if (log)
-                        Log.WriteLog(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.InnerException));
+                        Log.WriteLog(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit. InnerException: {0}", ex.InnerException));
                 }
                 else
                 {
-                    Console.WriteLine(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.Message));
+                    Console.WriteLine(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit. Exception Message: {0}", ex.Message));
                     if (log)
-                        Log.WriteLog(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit: {0}", ex.Message));
+                        Log.WriteLog(String.Format("[ERROR] CheckUri(), HttpClient Exception was hit. Exception Message: {0}", ex.Message));
                 }
 
             }//End Catch httpClient = new HttpClient()
