@@ -1,10 +1,11 @@
 # testurltls
-Test the TLS version negioated (or specified) with a remote host via an URL
-Support TLS Versions: SSL3 to TLS 1.2
+Test the TLS version negioated (or specified) with a remote host via an URL.<br />
+Support TLS versions: SSL3 to TLS 1.2
 
 ## Legal:
-You the executor, runner, user accept all liability.
-This code comes with ABSOLUTELY NO WARRANTY.
+	You the executor, runner, user accept all liability.
+	This code comes with ABSOLUTELY NO WARRANTY.
+	You may redistribute copies of the code under the terms of the GPL v3.
 
 ## Help/Syntax
 ```cmd
